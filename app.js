@@ -1,5 +1,5 @@
 //jshint esversion:6
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
@@ -8,6 +8,11 @@ const mongoose = require("mongoose");
 const encrypt = require("mongoose-encryption");
 //npm i md5
 const md5 = require("md5");
+//npm i bcrypt
+const bcrypt = require("bcrypt");
+const { hash } = require("bcrypt");
+const saltRounds = 9;
+//const myPlaintextPassword = req.body.password;
 
 const app = express();
 
@@ -15,7 +20,6 @@ const app = express();
 console.log(process.env.API_KEY);
 //log Hash function
 console.log(md5("123456"));
-
 
 app.use(express.static("public"));
 app.set("view engine", "ejs");
@@ -48,31 +52,38 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const newUser = new User({
-    email: req.body.username,
-    password: md5(req.body.password)
-  });
-  newUser.save((err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.render("secrets");
-    }
+  //bcrypt function
+  bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
+    const newUser = new User({
+      email: req.body.username,
+      password: hash,
+      //password: md5(req.body.password)
+    });
+    newUser.save((err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.render("secrets");
+      }
+    });
   });
 });
 
 app.post("/login", (req, res) => {
   const username = req.body.username;
-  const password = md5(req.body.password);
+  //const password = md5(req.body.password);
+  const password = req.body.password;
 
   User.findOne({ email: username }, (err, foundUser) => {
     if (err) {
       console.log(err);
     } else {
       if (foundUser) {
-        if (foundUser.password === password) {
-          res.render("secrets");
-        }
+        bcrypt.compare(password, foundUser.password, (err, result) => {
+          if (result === true) {
+            res.render("secrets");
+          }
+        });
       }
     }
   });
