@@ -42,7 +42,6 @@ app.use(passport.session());
 
 mongoose.connect("mongodb://localhost:27017/userDB", { useNewUrlParser: true });
 
-
 const userSchema = new mongoose.Schema({
   email: String,
   password: String,
@@ -74,9 +73,53 @@ app.get("/register", (req, res) => {
   res.render("register");
 });
 
-app.post("/register", (req, res) => {});
+app.get("/secrets", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.render("secrets");
+  } else {
+    res.redirect("/login");
+  }
+});
 
-app.post("/login", (req, res) => {});
+app.get("/logout",(req,res) => {
+  req.logout();
+  res.redirect("/");
+})
+
+
+app.post("/register", (req, res) => {
+  User.register(
+    { username: req.body.username },
+    req.body.password,
+    function (err, user) {
+      if (err) {
+        console.log(err);
+        res.redirect("/register");
+      } else {
+        passport.authenticate("local")(req, res, function () {
+          res.redirect("/secrets");
+        });
+      }
+    }
+  );
+});
+
+app.post("/login", (req, res) => {
+  const user = new User({
+    username: req.body.username,
+    password: req.body.password,
+  });
+
+  req.login(user, (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      passport.authenticate("local")(req, res, () => {
+        res.redirect("/secrets");
+      });
+    }
+  });
+});
 
 app.listen(3000, () => {
   console.log("Server running at local host " + 3000);
