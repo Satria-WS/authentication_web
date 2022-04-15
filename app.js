@@ -56,6 +56,7 @@ passport.use(
       userProfileURL: "https://www.googleapis.com/ouath2/v3/userinfo",
     },
     function (accessToken, refreshToken, profile, cb) {
+      
       User.findOrCreate({ googleId: profile.id }, function (err, user) {
         return cb(err, user);
       });
@@ -71,6 +72,18 @@ userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ["pass
 app.get("/", (req, res) => {
   res.render("home");
 });
+
+app.get("/auth/google",
+  passport.authenticate("google", { scope: ["profile"] })
+);
+
+app.get("/auth/google/secrets",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  function (req, res) {
+    // Successful authentication, redirect home.
+    res.redirect("/secrets");
+  }
+);
 
 app.get("/login", (req, res) => {
   res.render("login");
