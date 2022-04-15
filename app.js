@@ -8,13 +8,12 @@ const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const findOrCreate = require("mongoose-findorcreate");
 
 const app = express();
 
 //log API key
 console.log(process.env.API_KEY);
-//log Hash function
-console.log(md5("123456"));
 
 app.use(express.static("public"));
 app.set("view engine", "ejs");
@@ -39,6 +38,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.plugin(passportLocalMongoose);
+userSchema.plugin(findOrCreate);
 
 const User = new mongoose.model("User", userSchema);
 
