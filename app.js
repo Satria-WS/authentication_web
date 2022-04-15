@@ -4,15 +4,11 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
-//npm i mongoose-encryption
-const encrypt = require("mongoose-encryption");
-//npm i md5
-const md5 = require("md5");
-//npm i bcrypt
-const bcrypt = require("bcrypt");
-const { hash } = require("bcrypt");
-const saltRounds = 9;
-//const myPlaintextPassword = req.body.password;
+const session = require("express-session");
+const passport = require("passport");
+const passportLocalMongoose = require("passport-local-mongoose");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+
 
 const app = express();
 
@@ -92,4 +88,4 @@ app.post("/login", (req, res) => {
 app.listen(3000, () => {
   console.log("Server running at local host " + 3000);
 });
-//test
+//level 6
